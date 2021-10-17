@@ -19,8 +19,12 @@ tokens = [
              'MINUS',
              'DIV',
              'EQUAL',
+             'NEQ'
              'GT',
              'LT',
+             'GEQ',
+             'LEQ',
+             'BINDING',
              'BRACKET',
              'MUL',
              'AND',
@@ -34,7 +38,11 @@ t_ignore = ' \n'
 t_PLUS = '\+'
 t_MINUS = '-'
 t_DIV = r'\\'
-t_EQUAL = '='
+t_EQUAL = '=='
+t_NEQ = '!='
+t_BINDING = '='
+t_GEQ = '>='
+t_LEQ = '<='
 t_GT = '>'
 t_LT = '<'
 t_BRACKET = r'({|}|\(|\))'
@@ -45,6 +53,7 @@ t_POW = '[\^]'
 t_NOT = '!'
 t_SEMICOLON = ';'
 
+
 # t_VARIABLE = r'[a-z]+'
 
 def t_FUNCTION(t):
@@ -52,9 +61,11 @@ def t_FUNCTION(t):
     t.type = reserved.get(t.value, 'VARIABLE')
     return t
 
+
 def t_NUMBER(t):
     r'[0-9]+'
     return t
+
 
 def t_VARIABLE(t):
     r'[a-z0-9A-Z_]+'

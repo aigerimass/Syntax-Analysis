@@ -1,6 +1,5 @@
 import sys
 import ply.yacc as yacc
-import parse_classes
 
 from lex import tokens
 from parse_classes import *
@@ -69,7 +68,7 @@ def p_op_if(p):
     if len(p) == 12:
         p[0] = OpIf(p[3], p[6], p[10])
     else:
-        p[0] = OpIf(p[3], p[6])
+        p[0] = OpIf(p[3], p[6], [])
 
 
 def p_op_while(p):
@@ -89,6 +88,7 @@ def p_op_return(p):
 
 def p_f_call(p):
     '''f_call : FUNCTION BRACKET list_of_args BRACKET'''
+    p[0] = OpFuncCall(p[1], p[3])
 
 
 def p_expr(p):
@@ -119,5 +119,91 @@ def p_expr_without_and(p):
 
 
 def p_expr_without_not(p):
-    '''expr_without_not : expr_without_compare EQUAL expr_without_compare'''
+    '''expr_without_not : expr_without_compare EQUAL expr_without_compare
+                        | expr_without_compare NEQ expr_without_compare
+                        | expr_without_compare GEQ expr_without_compare
+                        | expr_without_compare LEQ expr_without_compare
+                        | expr_without_compare GT expr_without_compare
+                        | expr_without_compare LT expr_without_compare
+                        | expr_without_compare'''
+    if len(p) == 2:
+        p[0] = ExpWithoutNot(p[1])
+    elif p[2] == "==":
+        p[0] = ExpWithoutNot(ExpEqual(p[1], p[3]))
+    elif p[2] == "!=":
+        p[0] = ExpWithoutNot(ExpNotEqual(p[1], p[3]))
+    elif p[2] == ">=":
+        p[0] = ExpWithoutNot(ExpGreaterEqual(p[1], p[3]))
+    elif p[2] == "<=":
+        p[0] = ExpWithoutNot(ExpLessEqual(p[1], p[3]))
+    elif p[2] == ">":
+        p[0] = ExpWithoutNot(ExpGreater(p[1], p[3]))
+    elif p[2] == "<":
+        p[0] = ExpWithoutNot(ExpLess(p[1], p[3]))
 
+
+def p_expr_without_compare(p):
+    '''expr_without_compare : expr_without_compare PLUS expr_monomial
+                            | expr_without_compare MINUS expr_monomial
+                            | expr_monomial'''
+    if len(p) == 2:
+        p[0] = ExpWithoutCompare(p[1])
+    elif p[2] == "+":
+        p[0] = ExpWithoutCompare(ExpPlus(p[1], p[3]))
+    else:
+        p[0] = ExpWithoutCompare(ExpMinus(p[1], p[3]))
+
+
+def p_expr_monomial(p):
+    '''expr_monomial : expr_monomial MUL expr_indivisible
+                     | expr_monomial DIV expr_indivisible
+                     | expr_indivisible'''
+
+
+def p_expr_indivisible(p):
+    '''expr_indivisible : BRACKET MINUS expr_positive BRACKET
+                        | expr_positive'''
+    if len(p) == 2:
+        p[0] = ExpIndivisible(p[1])
+    else:
+        p[0] = ExpIndivisible(ExpUnaryMinus(p[3]))
+
+
+def p_expr_positive(p):
+    '''expr_positive : expr_unit POW expr_positive
+                     | expr_unit'''
+    if len(p) == 2:
+        p[0] = ExpWithoutUnaryMinus(p[1])
+    else:
+        p[0] = ExpWithoutUnaryMinus(ExpPower(p[1], p[3]))
+
+
+def p_expr_unit(p):
+    '''expr_unit : NUMBER
+                 | STRING
+                 | VARIABLE
+                 | f_call
+                 | BRACKET expr BRACKET'''
+    if len(p) == 4:
+        p[0] = ExpUnit(ExpInBrackets(p[2]))
+    elif isinstance(int, p[1]):
+        p[0] = ExpUnit(Number(p[1]))
+    elif type(p[1]) == OpFuncCall:
+        p[0] = ExpUnit(p[1])
+    elif p[1][0] == "\"":
+        p[0] = ExpUnit(StringLiteral(p[1]))
+    else:
+        p[0] = Variable(p[1])
+
+
+def p_error(p):
+    print("Syntax error")
+
+
+sys.stdout = open(sys.argv[1] + '.out', 'w')
+
+parser = yacc.yacc()
+s = open(sys.argv[1], 'r').read()
+
+result = parser.parse(s)
+result.show()

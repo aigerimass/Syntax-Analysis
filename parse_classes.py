@@ -1,11 +1,22 @@
 class Program:
-    def __init__(self, funcs):
-        self.funcs = funcs
+    def __init__(self, arg):
+        self.functions = arg
+        self.dic_functions = dict()
+        for func in self.functions:
+            self.dic_functions[func.name] = func
 
     def show(self):
-        for func in self.funcs:
+        for func in self.functions:
             func.show()
             print("--------")
+
+    def parse_main(self):
+        self.dic_functions["Main"].func_parse([], self.dic_functions)
+
+    def anal(self):
+        for v in self.dic_functions["Main"].values:
+            v.show()
+            print()
 
 
 class Function:
@@ -13,6 +24,9 @@ class Function:
         self.name = name
         self.args = args
         self.body = body
+        self.functions = dict()
+        self.values = dict()
+        self.bounds = dict()
 
     def show(self):
         print("Function Definition: [\nname = \"", self.name, "\",\nargs:", sep="", end=" ")
@@ -23,6 +37,90 @@ class Function:
             op.show()
             print(";\n")
         print("]")
+
+    def parse_expr(self, expr):
+        expr_type = type(expr)
+        if expr_type is ExpOr:
+            return self.parse_expr(expr.arg1) or self.parse_expr(expr.arg2)
+        elif expr_type is ExpAnd:
+            return self.parse_expr(expr.arg1) and self.parse_expr(expr.arg2)
+        elif expr_type is ExpNot:
+            return not (self.parse_expr(expr.arg))
+        elif expr_type is ExpEqual:
+            return self.parse_expr(expr.arg1) == self.parse_expr(expr.arg2)
+        elif expr_type is ExpGreater:
+            return self.parse_expr(expr.arg1) > self.parse_expr(expr.arg2)
+        elif expr_type is ExpGreaterEqual:
+            return self.parse_expr(expr.arg1) >= self.parse_expr(expr.arg2)
+        elif expr_type is ExpLess:
+            return self.parse_expr(expr.arg1) < self.parse_expr(expr.arg2)
+        elif expr_type is ExpLessEqual:
+            return self.parse_expr(expr.arg1) <= self.parse_expr(expr.arg2)
+        elif expr_type is ExpPlus:
+            return self.parse_expr(expr.arg1) + self.parse_expr(expr.arg2)
+        elif expr_type is ExpMinus:
+            return self.parse_expr(expr.arg1) - self.parse_expr(expr.arg2)
+        elif expr_type is ExpMultiply:
+            return self.parse_expr(expr.arg1) * self.parse_expr(expr.arg2)
+        elif expr_type is ExpDivision:
+            return self.parse_expr(expr.arg1) / self.parse_expr(expr.arg2)
+        elif expr_type is ExpUnaryMinus:
+            return -self.parse_expr(expr.arg)
+        elif expr_type is ExpPower:
+            return self.parse_expr(expr.arg1) ^ self.parse_expr(expr.arg2)
+        elif expr_type is ExpUnit:
+            unit_type = type(expr.arg)
+            if unit_type is Variable:
+                return self.values[expr.arg.name]
+            elif unit_type is Number:
+                return expr.arg
+            elif unit_type is StringLiteral:
+                return expr.arg
+        elif expr_type is OpFuncCall:
+            return self.func_parse(expr.args, self.functions[expr.name])
+        else:
+            assert 0
+
+    def body_parse(self, body):
+        for op in body:
+            if type(op) is OpBinding:
+                self.values[op.variable.name] = self.parse_expr(op.expr)
+                if type(self.values[op.variable.name]) is int:
+                    up_bound = max(self.bounds.get(op.variable.name,
+                                                   [self.values[op.variable.name], self.values[op.variable.name]])[1],
+                                   self.values[op.variable.name])
+                    down_bound = min(self.bounds[op.variable.name][0],
+                                     self.values[op.variable.name])
+                    self.bounds[op.variable.name] = [down_bound, up_bound]
+            elif type(op) is OpIf:
+                if self.parse_expr(op.condition):
+                    x = self.body_parse(op.body)
+                    if type(x) is not OpSkip:
+                        return x
+                else:
+                    x = self.body_parse(op.body_else)
+                    if type(x) is not OpSkip:
+                        return x
+            elif type(op) is OpFuncCall:
+                self.func_parse(op.args, self.functions[op.name])
+            elif type(op) is OpWhile:
+                while self.parse_expr(op.condition):
+                    x = self.body_parse(op.body_else)
+                    if type(x) is not OpSkip:
+                        return x
+            elif type(op) is OpFuncReturn:
+                return self.parse_expr(op.expr)
+            elif type(op) is OpSkip:
+                continue
+            else:
+                assert 0
+        return OpSkip
+
+    def func_parse(self, args, all_functions):
+        self.functions = all_functions
+        for arg in args:
+            self.values[self.args.name] = arg
+        return self.body_parse(self.body)
 
 
 class OpSkip:
@@ -385,7 +483,7 @@ class Variable:
         print("Var \"", self.name, "\"", end="", sep="")
 
 
-t = ExpWithoutOr( ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
+t = ExpWithoutOr(ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
 g = OpFuncCall("namefunc", [Variable("arg1"), Variable("arg2")])
 r = OpFuncReturn(t)
 w = OpWhile(t, [g, r])
@@ -396,5 +494,3 @@ f = Function("namefunc", ["arg1", "arg2", "arg3"], [w, i, r])
 
 p = Program([f, f, f])
 p.show()
-
-
