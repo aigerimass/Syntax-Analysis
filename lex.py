@@ -23,6 +23,7 @@ tokens = [
              'LT',
              'GEQ',
              'LEQ',
+            'NEQ',
              'BINDING',
              'BRACKET',
              'MUL',
@@ -40,6 +41,7 @@ t_DIV = r'\\'
 t_EQUAL = '=='
 t_BINDING = '='
 t_GEQ = '>='
+t_NEQ = '!='
 t_LEQ = '<='
 t_GT = '>'
 t_LT = '<'

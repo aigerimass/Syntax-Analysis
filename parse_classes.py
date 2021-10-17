@@ -59,9 +59,9 @@ class Function:
             if unit_type is Variable:
                 return self.values[expr.arg.name]
             elif unit_type is Number:
-                return expr.arg
+                return expr.arg.arg
             elif unit_type is StringLiteral:
-                return expr.arg
+                return expr.arg.arg
         elif expr_type is OpFuncCall:
             return self.func_parse(expr.args, self.functions[expr.name])
         else:
@@ -467,16 +467,20 @@ class Variable:
         print("Var \"", self.name, "\"", end="", sep="")
 
 
-t = ExpWithoutOr(ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
-t.show()
-print()
-g = OpFuncCall("namefunc", [Variable("arg1"), Variable("arg2")])
-g.show()
-print()
-r = OpFuncReturn(t)
-r.show()
-print()
-w = OpWhile(t, [g, r])
-w.show()
-i = OpIf(t, [w], [g])
-i.show()
+# t = ExpWithoutOr(ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
+# t.show()
+# print()
+# g = OpFuncCall("namefunc", [Variable("arg1"), Variable("arg2")])
+# g.show()
+# print()
+# r = OpFuncReturn(t)
+# r.show()
+# print()
+# w = OpWhile(t, [g, r])
+# w.show()
+# i = OpIf(t, [w], [g])
+# i.show()
+
+t = Program([Function("Main", [], [OpBinding(Variable("x"), ExpPlus(ExpUnit(Number(1)), ExpUnit(Number(2))))], [])])
+t.parse_main()
+t.anal()
