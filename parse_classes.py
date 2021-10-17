@@ -13,6 +13,7 @@ class Program:
             v.show()
             print()
 
+
 class Function:
     def __init__(self, name, args, body, ret_value):
         self.name = name
@@ -21,6 +22,7 @@ class Function:
         self.ret_value = ret_value
         self.functions = dict()
         self.values = dict()
+        self.bounds = dict()
 
     def parse_expr(self, expr):
         expr_type = type(expr)
@@ -47,11 +49,11 @@ class Function:
         elif expr_type is ExpMultiply:
             return self.parse_expr(expr.arg1) * self.parse_expr(expr.arg2)
         elif expr_type is ExpDivision:
-            return self.parse_expr(expr.arg1) == self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1) / self.parse_expr(expr.arg2)
         elif expr_type is ExpUnaryMinus:
-            return self.parse_expr(expr.arg1) == self.parse_expr(expr.arg2)
+            return -self.parse_expr(expr.arg)
         elif expr_type is ExpPower:
-            return self.parse_expr(expr.arg1) == self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1) ^ self.parse_expr(expr.arg2)
         elif expr_type is ExpUnit:
             unit_type = type(expr.arg)
             if unit_type is Variable:
@@ -69,6 +71,13 @@ class Function:
         for op in body:
             if type(op) is OpBinding:
                 self.values[op.variable.name] = self.parse_expr(op.expr)
+                if type(self.values[op.variable.name]) is int:
+                    up_bound = max(self.bounds.get(op.variable.name,
+                                                   [self.values[op.variable.name], self.values[op.variable.name]])[1],
+                                   self.values[op.variable.name])
+                    down_bound = min(self.bounds[op.variable.name][0],
+                                     self.values[op.variable.name])
+                    self.bounds[op.variable.name] = [down_bound, up_bound]
             elif type(op) is OpIf:
                 if self.parse_expr(op.condition):
                     x = self.body_parse(op.body)
