@@ -1,7 +1,17 @@
 class Program:
     def __init__(self, arg):
         self.functions = arg
+        self.dic_functions = dict()
+        for f in self.functions:
+            self.dic_functions[f.name] = f
 
+    def parse_main(self):
+        self.dic_functions["Main"].func_parse([], self.dic_functions)
+
+    def anal(self):
+        for v in self.dic_functions["Main"].values:
+            v.show()
+            print()
 
 class Function:
     def __init__(self, name, args, body, ret_value):
@@ -83,15 +93,11 @@ class Function:
                 assert 0
         return OpSkip
 
-
     def func_parse(self, args, all_functions):
         self.functions = all_functions
-
         for arg in args:
             self.values[self.args.name] = arg
         return self.body_parse(self.body)
-
-
 
 
 class OpSkip:
