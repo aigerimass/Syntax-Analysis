@@ -13,7 +13,10 @@ def p_program(p):
 def p_list_of_functions(p):
     '''list_of_functions : func_init list_of_functions
                         |'''
-    p[0] = [p[1]] + p[2]
+    if len(p) == 3:
+        p[0] = [p[1]] + p[2]
+    else:
+        p[0] = []
 
 
 def p_main(p):
@@ -41,10 +44,10 @@ def p_list_of_args(p):
 def p_list_of_op(p):
     '''list_of_op : operation SEMICOLON list_of_op
                  |'''
-    p[0] = []
     if len(p) == 1:
-        return
-    p[0] += p[1]
+        p[0] = []
+    else:
+        p[0] = [p[1]] + p[3]
 
 
 def p_operation(p):
@@ -58,7 +61,7 @@ def p_operation(p):
 
 
 def p_op_skip(p):
-    '''skip: SKIP'''
+    '''op_skip : SKIP'''
     p[0] = OpSkip()
 
 
@@ -186,7 +189,7 @@ def p_expr_unit(p):
                  | BRACKET expr BRACKET'''
     if len(p) == 4:
         p[0] = ExpUnit(ExpInBrackets(p[2]))
-    elif isinstance(int, p[1]):
+    elif type(p[1]) == int:
         p[0] = ExpUnit(Number(p[1]))
     elif type(p[1]) == OpFuncCall:
         p[0] = ExpUnit(p[1])
@@ -206,4 +209,4 @@ parser = yacc.yacc()
 s = open(sys.argv[1], 'r').read()
 
 result = parser.parse(s)
-result.show()
+# result.show()

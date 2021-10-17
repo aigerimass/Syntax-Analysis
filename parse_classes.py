@@ -483,14 +483,14 @@ class Variable:
         print("Var \"", self.name, "\"", end="", sep="")
 
 
-t = ExpWithoutOr(ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
-g = OpFuncCall("namefunc", [Variable("arg1"), Variable("arg2")])
-r = OpFuncReturn(t)
-w = OpWhile(t, [g, r])
-i = OpIf(t, [w], [g])
-
-print()
-f = Function("namefunc", ["arg1", "arg2", "arg3"], [w, i, r])
-
-p = Program([f, f, f])
-p.show()
+# t = ExpWithoutOr(ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
+# g = OpFuncCall("namefunc", [Variable("arg1"), Variable("arg2")])
+# r = OpFuncReturn(t)
+# w = OpWhile(t, [g, r])
+# i = OpIf(t, [w], [g])
+#
+# print()
+# f = Function("namefunc", ["arg1", "arg2", "arg3"], [w, i, r])
+#
+# p = Program([f, f, f])
+# p.show()
