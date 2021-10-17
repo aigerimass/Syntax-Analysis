@@ -1,5 +1,6 @@
 A11__(){}
 Bs_1(){}
 Main(){
-x_1 = 10 + 5 \ * ^ && || "HELLO WORLD"
+x_1 = 10 + 5 \ * ^ && || "\"HELLO WORLD" > < ! ;
+while if else
 }
