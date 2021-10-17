@@ -32,7 +32,9 @@ class Function:
         print("Function Definition: [\nname = \"", self.name, "\",\nargs:", sep="", end=" ")
         for arg in self.args[:-1]:
             print("\"", arg, "\"", sep="", end=", ")
-        print(self.args[-1], "\nbody:")
+        if len(self.args) != 0:
+            print(self.args[-1], end="")
+        print("\nbody:")
         for op in self.body:
             op.show()
             print(";\n")
@@ -377,16 +379,33 @@ class ExpMinus:
         self.arg1 = arg1
         self.arg2 = arg2
 
+    def show(self):
+        print("Minus(", end="")
+        self.arg1.show()
+        print(", ", end="")
+        self.arg2.show()
+        print(")", end="")
+
 
 class ExpMonomial:  # M without + and -
     def __init__(self, arg):
         self.arg = arg
+
+    def show(self):
+        self.arg.show()
 
 
 class ExpMultiply:
     def __init__(self, arg1, arg2):
         self.arg1 = arg1
         self.arg2 = arg2
+
+    def show(self):
+        print("Mult(", end="")
+        self.arg1.show()
+        print(", ", end="")
+        self.arg2.show()
+        print(")", end="")
 
 
 class ExpDivision:
@@ -462,7 +481,7 @@ class StringLiteral:
         self.arg = arg
 
     def show(self):
-        print("\"", self.arg, "\"", end="", sep="")
+        print("String(", self.arg, ")", end="", sep="")
 
 
 class ExpInBrackets:

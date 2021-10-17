@@ -58,7 +58,7 @@ t_SEMICOLON = ';'
 
 def t_FUNCTION(t):
     r'[A-Z][a-zA-Z0-9_]*'
-    t.type = reserved.get(t.value, 'VARIABLE')
+    t.type = reserved.get(t.value, 'FUNCTION')
     return t
 
 
@@ -68,7 +68,7 @@ def t_NUMBER(t):
 
 
 def t_VARIABLE(t):
-    r'[a-z0-9A-Z_]+'
+    r'[a-z][a-zA-Z0-9_]*'
     t.type = reserved.get(t.value, 'VARIABLE')
     return t
 
@@ -87,8 +87,8 @@ lexer = lex.lex()
 lexer.input(open(sys.argv[1], 'r').read())
 sys.stdout = open(sys.argv[1] + '.out', 'w')
 
-while True:
-    tok = lexer.token()
-    if not tok:
-        break
-    print(tok)
+# while True:
+#     tok = lexer.token()
+#     if not tok:
+#         break
+#     print(tok)

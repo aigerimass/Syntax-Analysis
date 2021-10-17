@@ -7,7 +7,7 @@ from parse_classes import *
 
 def p_program(p):
     '''program : list_of_functions main'''
-    p[0] = Program(p[1] + p[2])
+    p[0] = Program(p[1] + [p[2]])
 
 
 def p_list_of_functions(p):
@@ -81,7 +81,7 @@ def p_op_while(p):
 
 def p_op_bind(p):
     '''op_bind : VARIABLE BINDING expr'''
-    p[0] = OpBinding(p[1], p[3])
+    p[0] = OpBinding(Variable(p[1]), p[3])
 
 
 def p_op_return(p):
@@ -90,8 +90,20 @@ def p_op_return(p):
 
 
 def p_f_call(p):
-    '''f_call : FUNCTION BRACKET list_of_args BRACKET'''
+    '''f_call : FUNCTION BRACKET list_of_args_call BRACKET'''
     p[0] = OpFuncCall(p[1], p[3])
+
+
+def p_list_of_args_call(p):
+    '''list_of_args_call : expr SEMICOLON list_of_args_call
+                   | expr
+                   |'''
+    p[0] = []
+    if len(p) == 1:
+        return
+    p[0] += [p[1]]
+    if len(p) == 4:
+        p[0] += p[3]
 
 
 def p_expr(p):
@@ -161,6 +173,12 @@ def p_expr_monomial(p):
     '''expr_monomial : expr_monomial MUL expr_indivisible
                      | expr_monomial DIV expr_indivisible
                      | expr_indivisible'''
+    if len(p) == 2:
+        p[0] = ExpMonomial(p[1])
+    elif p[2] == "*":
+        p[0] = ExpMonomial(ExpMultiply(p[1], p[3]))
+    else:
+        p[0] = ExpMonomial(ExpDivision(p[1], p[3]))
 
 
 def p_expr_indivisible(p):
@@ -182,25 +200,35 @@ def p_expr_positive(p):
 
 
 def p_expr_unit(p):
-    '''expr_unit : NUMBER
-                 | STRING
-                 | VARIABLE
+    '''expr_unit : expr_number
+                 | expr_string
+                 | expr_variable
                  | f_call
                  | BRACKET expr BRACKET'''
     if len(p) == 4:
         p[0] = ExpUnit(ExpInBrackets(p[2]))
-    elif type(p[1]) == int:
-        p[0] = ExpUnit(Number(p[1]))
-    elif type(p[1]) == OpFuncCall:
-        p[0] = ExpUnit(p[1])
-    elif p[1][0] == "\"":
-        p[0] = ExpUnit(StringLiteral(p[1]))
     else:
-        p[0] = Variable(p[1])
+        p[0] = ExpUnit(p[1])
+
+
+def p_expr_number(p):
+    '''expr_number : NUMBER'''
+    p[0] = Number(p[1])
+
+
+def p_expr_string(p):
+    '''expr_string : STRING'''
+    p[0] = StringLiteral(p[1])
+
+
+def p_expr_variable(p):
+    '''expr_variable : VARIABLE'''
+    p[0] = Variable(p[1])
 
 
 def p_error(p):
-    print("Syntax error")
+    print("Syntax error", p)
+    exit(1)
 
 
 sys.stdout = open(sys.argv[1] + '.out', 'w')
@@ -209,4 +237,4 @@ parser = yacc.yacc()
 s = open(sys.argv[1], 'r').read()
 
 result = parser.parse(s)
-# result.show()
+result.show()
