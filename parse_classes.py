@@ -1,19 +1,36 @@
 class Program:
-    def __init__(self, arg):
-        self.functions = arg
+    def __init__(self, funcs):
+        self.funcs = funcs
+
+    def show(self):
+        for func in self.funcs:
+            func.show()
+            print("--------")
 
 
 class Function:
-    def __init__(self, name, args, body, ret_value):
+    def __init__(self, name, args, body):
         self.name = name
         self.args = args
         self.body = body
-        self.ret_value = ret_value
+
+    def show(self):
+        print("Function Definition: [\nname = \"", self.name, "\",\nargs:", sep="", end=" ")
+        for arg in self.args[:-1]:
+            print("\"", arg, "\"", sep="", end=", ")
+        print(self.args[-1], "\nbody:")
+        for op in self.body:
+            op.show()
+            print(";\n")
+        print("]")
 
 
 class OpSkip:
     def __init__(self):
         pass
+
+    def show(self):
+        print("Skip()", end="")
 
 
 class OpIf:
@@ -23,7 +40,7 @@ class OpIf:
         self.body_else = body_else
 
     def show(self):
-        print("\nIf(")
+        print(">If(")
         print("cond:")
         self.condition.show()
         print("\nbody:")
@@ -44,7 +61,7 @@ class OpWhile:
         self.body = body
 
     def show(self):
-        print("While(\ncond: ")
+        print(">While(\ncond: ")
         self.condition.show()
         print("\nbody:")
         for op in self.body:
@@ -59,7 +76,7 @@ class OpBinding:
         self.expr = expr
 
     def show(self):
-        print("Bind(", end="")
+        print(">Bind(", end="")
         self.variable.show()
         print(", ", end="")
         self.expr.show()
@@ -72,7 +89,7 @@ class OpFuncCall:
         self.args = args
 
     def show(self):
-        print("Call(name: \"", self.name, "\", args: ", end="", sep="")
+        print(">Call(name: \"", self.name, "\", args: ", end="", sep="")
         for arg in self.args[:-1]:
             arg.show()
             print(", ", end="")
@@ -85,7 +102,7 @@ class OpFuncReturn:
         self.expr = expr
 
     def show(self):
-        print("Return(", end="")
+        print(">Return(", end="")
         self.expr.show()
         print(")", end="")
 
@@ -274,7 +291,6 @@ class ExpMultiply:
         self.arg2 = arg2
 
 
-
 class ExpDivision:
     def __init__(self, arg1, arg2):
         self.arg1 = arg1
@@ -326,6 +342,7 @@ class ExpPower:
         self.arg2.show()
         print(")", end="")
 
+
 class ExpUnit:  # A
     def __init__(self, arg):
         self.arg = arg
@@ -369,16 +386,15 @@ class Variable:
 
 
 t = ExpWithoutOr( ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
-t.show()
-print()
 g = OpFuncCall("namefunc", [Variable("arg1"), Variable("arg2")])
-g.show()
-print()
 r = OpFuncReturn(t)
-r.show()
-print()
 w = OpWhile(t, [g, r])
-w.show()
 i = OpIf(t, [w], [g])
-i.show()
+
+print()
+f = Function("namefunc", ["arg1", "arg2", "arg3"], [w, i, r])
+
+p = Program([f, f, f])
+p.show()
+
 
