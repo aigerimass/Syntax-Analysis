@@ -19,7 +19,7 @@ tokens = [
              'MINUS',
              'DIV',
              'EQUAL',
-             'NEQ'
+             'NEQ',
              'GT',
              'LT',
              'GEQ',
