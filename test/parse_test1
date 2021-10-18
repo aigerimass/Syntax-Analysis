@@ -1,0 +1,22 @@
+Func_with_many_args(a; b; c; d; e){
+return a + b + c + d + e;
+}
+
+Func_with_While(condition){
+while(condition){
+a = 5;
+};
+return a + 4*8^2;
+}
+
+Fain(){
+skip;
+}
+
+Main(){
+   v = 4;
+   if (v == 3) {
+   return 0;
+   };
+   Func_with_many_args(v; 4+8*9; "sdfdf"; Func(65); 7; a || b >= 4);
+}

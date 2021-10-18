@@ -2,8 +2,13 @@ class Program:
     def __init__(self, arg):
         self.functions = arg
         self.dic_functions = dict()
-        for f in self.functions:
-            self.dic_functions[f.name] = f
+        for func in self.functions:
+            self.dic_functions[func.name] = func
+
+    def show(self):
+        for func in self.functions:
+            func.show()
+            print("--------")
 
     def parse_main(self):
         self.dic_functions["Main"].func_parse([], self.dic_functions)
@@ -15,14 +20,25 @@ class Program:
 
 
 class Function:
-    def __init__(self, name, args, body, ret_value):
+    def __init__(self, name, args, body):
         self.name = name
         self.args = args
         self.body = body
-        self.ret_value = ret_value
         self.functions = dict()
         self.values = dict()
         self.bounds = dict()
+
+    def show(self):
+        print("Function Definition: [\nname = \"", self.name, "\",\nargs:", sep="", end=" ")
+        for arg in self.args[:-1]:
+            print("\"", arg, "\"", sep="", end=", ")
+        if len(self.args) != 0:
+            print(self.args[-1], end="")
+        print("\nbody:")
+        for op in self.body:
+            op.show()
+            print(";\n")
+        print("]")
 
     def parse_expr(self, expr):
         expr_type = type(expr)
@@ -114,6 +130,9 @@ class OpSkip:
     def __init__(self):
         pass
 
+    def show(self):
+        print("Skip()", end="")
+
 
 class OpIf:
     def __init__(self, condition, body, body_else):
@@ -122,7 +141,7 @@ class OpIf:
         self.body_else = body_else
 
     def show(self):
-        print("\nIf(")
+        print(">If(")
         print("cond:")
         self.condition.show()
         print("\nbody:")
@@ -143,7 +162,7 @@ class OpWhile:
         self.body = body
 
     def show(self):
-        print("While(\ncond: ")
+        print(">While(\ncond: ")
         self.condition.show()
         print("\nbody:")
         for op in self.body:
@@ -158,8 +177,7 @@ class OpBinding:
         self.expr = expr
 
     def show(self):
-        print("Bind(", end="")
-        print("Bind(", end="")
+        print(">Bind(", end="")
         self.variable.show()
         print(", ", end="")
         self.expr.show()
@@ -172,7 +190,7 @@ class OpFuncCall:
         self.args = args
 
     def show(self):
-        print("Call(name: \"", self.name, "\", args: ", end="", sep="")
+        print(">Call(name: \"", self.name, "\", args: ", end="", sep="")
         for arg in self.args[:-1]:
             arg.show()
             print(", ", end="")
@@ -185,7 +203,7 @@ class OpFuncReturn:
         self.expr = expr
 
     def show(self):
-        print("Return(", end="")
+        print(">Return(", end="")
         self.expr.show()
         print(")", end="")
 
@@ -362,16 +380,33 @@ class ExpMinus:
         self.arg1 = arg1
         self.arg2 = arg2
 
+    def show(self):
+        print("Minus(", end="")
+        self.arg1.show()
+        print(", ", end="")
+        self.arg2.show()
+        print(")", end="")
+
 
 class ExpMonomial:  # M without + and -
     def __init__(self, arg):
         self.arg = arg
+
+    def show(self):
+        self.arg.show()
 
 
 class ExpMultiply:
     def __init__(self, arg1, arg2):
         self.arg1 = arg1
         self.arg2 = arg2
+
+    def show(self):
+        print("Mult(", end="")
+        self.arg1.show()
+        print(", ", end="")
+        self.arg2.show()
+        print(")", end="")
 
 
 class ExpDivision:
@@ -447,7 +482,7 @@ class StringLiteral:
         self.arg = arg
 
     def show(self):
-        print("\"", self.arg, "\"", end="", sep="")
+        print("String(", self.arg, ")", end="", sep="")
 
 
 class ExpInBrackets:
