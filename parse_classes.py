@@ -9,8 +9,8 @@ class Program:
         self.dic_functions["Main"].func_parse([], self.dic_functions)
 
     def anal(self):
-        for v in self.dic_functions["Main"].values:
-            v.show()
+        for n, v in self.dic_functions["Main"].bounds.items():
+            print(str(n) + " = " + str(v))
             print()
 
 
@@ -27,9 +27,9 @@ class Function:
     def parse_expr(self, expr):
         expr_type = type(expr)
         if expr_type is ExpOr:
-            return self.parse_expr(expr.arg1) or self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1) | self.parse_expr(expr.arg2)
         elif expr_type is ExpAnd:
-            return self.parse_expr(expr.arg1) and self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1) & self.parse_expr(expr.arg2)
         elif expr_type is ExpNot:
             return not (self.parse_expr(expr.arg))
         elif expr_type is ExpEqual:
@@ -49,11 +49,11 @@ class Function:
         elif expr_type is ExpMultiply:
             return self.parse_expr(expr.arg1) * self.parse_expr(expr.arg2)
         elif expr_type is ExpDivision:
-            return self.parse_expr(expr.arg1) / self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1) // self.parse_expr(expr.arg2)
         elif expr_type is ExpUnaryMinus:
             return -self.parse_expr(expr.arg)
         elif expr_type is ExpPower:
-            return self.parse_expr(expr.arg1) ^ self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1) ** self.parse_expr(expr.arg2)
         elif expr_type is ExpUnit:
             unit_type = type(expr.arg)
             if unit_type is Variable:
@@ -72,8 +72,9 @@ class Function:
             if type(op) is OpBinding:
                 self.values[op.variable.name] = self.parse_expr(op.expr)
                 if type(self.values[op.variable.name]) is int:
-                    up_bound = max(self.bounds.get(op.variable.name,
-                                                   [self.values[op.variable.name], self.values[op.variable.name]])[1],
+                    if op.variable.name not in self.bounds:
+                        self.bounds[op.variable.name] = [self.values[op.variable.name], self.values[op.variable.name]]
+                    up_bound = max(self.bounds[op.variable.name][1],
                                    self.values[op.variable.name])
                     down_bound = min(self.bounds[op.variable.name][0],
                                      self.values[op.variable.name])
@@ -481,6 +482,19 @@ class Variable:
 # i = OpIf(t, [w], [g])
 # i.show()
 
-t = Program([Function("Main", [], [OpBinding(Variable("x"), ExpPlus(ExpUnit(Number(1)), ExpUnit(Number(2))))], [])])
+t = Program([Function("Main", [], [OpBinding(Variable("x"), ExpMultiply(ExpUnit(Number(10)), ExpUnit(Number(2)))),
+                                   OpBinding(Variable("y"), ExpPlus(ExpUnit(Number(1)), ExpUnit(Number(2)))),
+                                   OpBinding(Variable("x"), ExpOr(ExpUnit(Number(1)), ExpUnit(Number(2)))),
+                                   OpBinding(Variable("x"), ExpPlus(ExpUnit(Number(1)), ExpUnit(Number(2)))),
+                                   OpBinding(Variable("y"), ExpPower(ExpUnit(Number(2)), ExpUnit(Variable('x')))),
+                                   OpBinding(Variable("x"), ExpDivision(ExpUnit(Number(100)), ExpUnit(Number(2)))),
+                                   OpBinding(Variable("t"), ExpDivision(ExpUnit(Number(200)), ExpUnit(Number(1)))),
+                                   OpIf(ExpGreater(ExpUnit(Variable("t")), ExpUnit(Number(1000))), [
+                                       OpBinding(Variable("t"), ExpUnit(Number(1000)))],
+                                        [
+                                            OpBinding(Variable("t"), ExpUnit(Number(1)))
+                                         ]),
+                                   ],
+                      [])])
 t.parse_main()
 t.anal()
