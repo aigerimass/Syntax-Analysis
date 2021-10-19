@@ -36,8 +36,8 @@ class Function:
             print("#" + str(n) + " = " + str(v))
         for op in self.body:
             print(op, end=';\n')
-            if type(op) is OpBinding:
-                print("#", self.bounds[op.variable.name], sep="", end=';\n')
+            if type(op) is OpBinding and type(self.values[op.variable.name]) is int:
+                print("#" + op.variable.name + " = ", self.bounds[op.variable.name], sep="", end=';\n')
 
         return "}"
 
@@ -100,21 +100,26 @@ class Function:
         elif expr_type is ExpPower:
             return self.parse_expr(expr.arg1) ** self.parse_expr(expr.arg2)
         elif expr_type is ExpUnit:
-            return self.parse_expr(expr.arg)
-        elif expr_type is Variable:
-            return self.values[expr.name]
-        elif expr_type is Number:
-            return int(expr.arg)
-        elif expr_type is StringLiteral:
-            return str(expr.arg)
-        elif expr_type is ExpInBrackets:
-            return self.parse_expr(expr.arg)
-        elif expr_type is OpFuncCall:
-            func = expr
-            if not (func.name in self.functions):
-                print("ERROR: the function", func.name, "has no declaration")
+            unit_type = type(expr.arg)
+            if unit_type is Variable:
+                if expr.arg.name not in self.values:
+                    print("ERROR: VARIABLE \"", expr.arg.name, "\" doesn't exist", sep='')
+                    exit(1)
+                return self.values[expr.arg.name]
+            elif unit_type is Number:
+                return int(expr.arg.arg)
+            elif unit_type is StringLiteral:
+                return str(expr.arg.arg)
+            elif unit_type is ExpInBrackets:
+                return self.parse_expr(expr.arg)
+            elif unit_type is OpFuncCall:
+                if not (expr.arg.name in self.functions):
+                    print("ERROR: the function", expr.arg.name, "has no declaration")
+                    exit(1)
+                return self.functions[expr.arg.name].func_parse(expr.arg.args, self.functions)
+            else:
+                print("ERROR: wrong EXPRESSION")
                 exit(1)
-            return self.functions[func.name].func_parse(func.args, self.functions)
         else:
             assert 0
 
@@ -131,14 +136,24 @@ class Function:
                                      self.values[op.variable.name])
                     self.bounds[op.variable.name] = [down_bound, up_bound]
             elif type(op) is OpIf:
+                b_before, v_before = dict(self.bounds), dict(self.values)
+                return_if = self.body_parse(op.body)
+                b_after_if, v_after_if = dict(self.bounds), dict(self.values)
+                self.bounds, self.values = dict(b_before), dict(v_before)
+                return_else = self.body_parse(op.body_else)
+                b_after_else, v_after_else = dict(self.bounds), dict(self.values)
+                self.bounds, self.values = dict(b_before), dict(v_before)
+                for var in b_before:
+                    b_before[var][0] = min(b_after_if[var][0], b_after_else[var][0])
+                    b_before[var][1] = max(b_after_if[var][1], b_after_else[var][1])
                 if self.parse_expr(op.condition):
-                    x = self.body_parse(op.body)
-                    if type(x) is not OpSkip:
-                        return x
+                    self.values = v_after_if
+                    if type(return_if) is not OpSkip:
+                        return return_if
                 else:
-                    x = self.body_parse(op.body_else)
-                    if type(x) is not OpSkip:
-                        return x
+                    self.values = v_after_else
+                    if type(return_else) is not OpSkip:
+                        return return_else
             elif type(op) is OpFuncCall:
                 if not (op.name in self.functions):
                     print("ERROR: the function", op.name, "has no declaration")
@@ -147,7 +162,7 @@ class Function:
             elif type(op) is OpWhile:
                 while self.parse_expr(op.condition):
                     x = self.body_parse(op.body)
-                    if type(x) is not OpSkip:
+                    if x is not OpSkip:
                         return x
             elif type(op) is OpFuncReturn:
                 return self.parse_expr(op.expr)
@@ -190,9 +205,13 @@ class OpIf:
 
     def __repr__(self):
         print("if", ' (', end='')
-        print(self.condition,end=') {\n')
+        print(self.condition, end=') {\n')
         print(*self.body, sep=";\n", end=";\n")
         print("}", end="")
+        if self.body_else:
+            print(" else {")
+            print(*self.body_else, sep=";\n", end=";\n")
+            print("}", end="")
         return ""
 
     def show(self):
@@ -218,6 +237,7 @@ class OpWhile:
 
     def __repr__(self):
         print("while (", self.condition, ") {", sep="")
+        print(*self.body, sep=";\n", end=";\n")
         return "}"
 
     def show(self):
@@ -645,7 +665,6 @@ class Number:
         self.arg = arg
 
     def __repr__(self):
-        # print(self.arg, end="")
         return self.arg
 
     def show(self):
@@ -688,4 +707,3 @@ class Variable:
 
     def show(self):
         print("Var \"", self.name, "\"", end="", sep="")
-
