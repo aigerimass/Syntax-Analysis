@@ -1,0 +1,6 @@
+F(){
+return 4;
+}
+Main(){
+skip;
+}

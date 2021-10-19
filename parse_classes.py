@@ -13,7 +13,6 @@ class Program:
     def arithmetic_parse(self):
         self.dic_functions["Main"].func_parse([], self.dic_functions)
 
-
     def __repr__(self):
         for func in self.functions:
             print(func)
@@ -101,20 +100,21 @@ class Function:
         elif expr_type is ExpPower:
             return self.parse_expr(expr.arg1) ** self.parse_expr(expr.arg2)
         elif expr_type is ExpUnit:
-            unit_type = type(expr.arg)
-            if unit_type is Variable:
-                return self.values[expr.arg.name]
-            elif unit_type is Number:
-                return int(expr.arg.arg)
-            elif unit_type is StringLiteral:
-                return str(expr.arg.arg)
-            elif unit_type is ExpInBrackets:
-                return self.parse_expr(expr.arg)
-            elif expr_type is OpFuncCall:
-                if not (expr.name in self.functions):
-                    print("ERROR: the function", expr.name, "has no declaration")
-                    exit(1)
-                return self.func_parse(expr.args, self.functions[expr.name])
+            return self.parse_expr(expr.arg)
+        elif expr_type is Variable:
+            return self.values[expr.name]
+        elif expr_type is Number:
+            return int(expr.arg)
+        elif expr_type is StringLiteral:
+            return str(expr.arg)
+        elif expr_type is ExpInBrackets:
+            return self.parse_expr(expr.arg)
+        elif expr_type is OpFuncCall:
+            func = expr
+            if not (func.name in self.functions):
+                print("ERROR: the function", func.name, "has no declaration")
+                exit(1)
+            return self.functions[func.name].func_parse(func.args, self.functions)
         else:
             assert 0
 
@@ -146,7 +146,7 @@ class Function:
                 self.functions[op.name].func_parse(op.args, self.functions)
             elif type(op) is OpWhile:
                 while self.parse_expr(op.condition):
-                    x = self.body_parse(op.body_else)
+                    x = self.body_parse(op.body)
                     if type(x) is not OpSkip:
                         return x
             elif type(op) is OpFuncReturn:

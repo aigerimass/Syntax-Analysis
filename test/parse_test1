@@ -16,8 +16,8 @@ Fain(){
 Main () {
    v = 4;
    Fain();
-   Func_with_many_args(1; 1; 1; 1; 1);
-   Func_with_many_args(0; 10; 1; 2; 2);
+   v = Func_with_many_args(1; 1; 1; 1; 1);
+   v = v + Func_with_While(1);
    if (v == 3) {
         return 0;
    };
