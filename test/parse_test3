@@ -1,6 +1,13 @@
 F(){
-return 4;
+    return 4;
+}
+Func_with_While(condition){
+    while(condition > 0){
+        a = a + 5;
+    };
+    return a + 4*8^2;
 }
 Main(){
+Func_with_While(1);
 skip;
 }

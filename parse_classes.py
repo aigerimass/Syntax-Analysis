@@ -137,9 +137,11 @@ class Function:
                     self.bounds[op.variable.name] = [down_bound, up_bound]
             elif type(op) is OpIf:
                 b_before, v_before = dict(self.bounds), dict(self.values)
+
                 return_if = self.body_parse(op.body)
                 b_after_if, v_after_if = dict(self.bounds), dict(self.values)
                 self.bounds, self.values = dict(b_before), dict(v_before)
+
                 return_else = self.body_parse(op.body_else)
                 b_after_else, v_after_else = dict(self.bounds), dict(self.values)
                 self.bounds, self.values = dict(b_before), dict(v_before)
@@ -148,11 +150,11 @@ class Function:
                     b_before[var][1] = max(b_after_if[var][1], b_after_else[var][1])
                 if self.parse_expr(op.condition):
                     self.values = v_after_if
-                    if type(return_if) is not OpSkip:
+                    if return_if is not OpSkip:
                         return return_if
                 else:
                     self.values = v_after_else
-                    if type(return_else) is not OpSkip:
+                    if return_else is not OpSkip:
                         return return_else
             elif type(op) is OpFuncCall:
                 if not (op.name in self.functions):

@@ -19,6 +19,10 @@ Main () {
    Fain();
    v = Func_with_many_args(1; 1; 1; 1; 1);
    v = v + Func_with_While(20);
+   g = 1 > 0;
+   if (g) {
+       v = v ^ 2;
+   };
    if (v == 4) {
         v = v * (-10);
    } else {
