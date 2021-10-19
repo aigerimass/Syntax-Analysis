@@ -233,11 +233,14 @@ def p_error(p):
 
 sys.stdout = open(sys.argv[1] + '.out', 'w')
 
+print("----------SYNTAX-ANALYSIS----------")
 parser = yacc.yacc()
 s = open(sys.argv[1], 'r').read()
 
 result = parser.parse(s)
 result.show()
+
+print("----------INTERVAL-ANALYSIS----------")
 result.parse_main()
 result.anal()
 print(result)

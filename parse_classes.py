@@ -22,6 +22,7 @@ class Program:
     def __repr__(self):
         for func in self.functions:
             print(func)
+            print("------------")
         return ""
 
 
@@ -108,8 +109,11 @@ class Function:
                 return int(expr.arg.arg)
             elif unit_type is StringLiteral:
                 return str(expr.arg.arg)
-        elif expr_type is OpFuncCall:
-            return self.func_parse(expr.args, self.functions[expr.name])
+            elif expr_type is OpFuncCall:
+                if not (expr.name in self.functions):
+                    print("ERROR: the function", expr.name, "has no declaration")
+                    exit(1)
+                return self.func_parse(expr.args, self.functions[expr.name])
         else:
             assert 0
 
@@ -135,6 +139,9 @@ class Function:
                     if type(x) is not OpSkip:
                         return x
             elif type(op) is OpFuncCall:
+                if not (op.name in self.functions):
+                    print("ERROR: the function", op.name, "has no declaration")
+                    exit(1)
                 self.functions[op.name].func_parse(op.args, self.functions)
             elif type(op) is OpWhile:
                 while self.parse_expr(op.condition):
@@ -252,7 +259,7 @@ class OpFuncCall:
     def show(self):
         print(">Call(name: \"", self.name, "\", args: ", end="", sep="")
         if not self.args:
-            print("()", end="")
+            print(")", end="")
             return
         for arg in self.args[:-1]:
             arg.show()
