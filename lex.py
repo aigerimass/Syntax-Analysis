@@ -19,14 +19,16 @@ tokens = [
              'MINUS',
              'DIV',
              'EQUAL',
-             'NEQ',
              'GT',
              'LT',
              'GEQ',
              'LEQ',
-            'NEQ',
+             'NEQ',
              'BINDING',
-             'BRACKET',
+             'ROUND_OPEN_BRACKET',
+             'ROUND_CLOSED_BRACKET',
+             'CURLY_OPEN_BRACKET',
+             'CURLY_CLOSED_BRACKET',
              'MUL',
              'AND',
              'OR',
@@ -40,14 +42,16 @@ t_PLUS = '\+'
 t_MINUS = '-'
 t_DIV = r'\\'
 t_EQUAL = '=='
-t_NEQ = '!='
 t_BINDING = '='
 t_GEQ = '>='
 t_NEQ = '!='
 t_LEQ = '<='
 t_GT = '>'
 t_LT = '<'
-t_BRACKET = r'({|}|\(|\))'
+t_ROUND_OPEN_BRACKET = r'\('
+t_ROUND_CLOSED_BRACKET = r'\)'
+t_CURLY_OPEN_BRACKET = r'\{'
+t_CURLY_CLOSED_BRACKET = r'\}'
 t_MUL = '[*]'
 t_AND = '\&\&'
 t_OR = r'\|\|'
@@ -55,8 +59,6 @@ t_POW = '[\^]'
 t_NOT = '!'
 t_SEMICOLON = ';'
 
-
-# t_VARIABLE = r'[a-z]+'
 
 def t_FUNCTION(t):
     r'[A-Z][a-zA-Z0-9_]*'

@@ -3,20 +3,22 @@ return a + b + c + d + e;
 }
 
 Func_with_While(condition){
-while(condition){
-a = 5;
-};
-return a + 4*8^2;
+    while(condition){
+        a = 5;
+    };
+    return a + 4*8^2;
 }
 
 Fain(){
-skip;
+    skip;
 }
 
-Main(){
+Main () {
    v = 4;
+   Fain();
+   Func_with_many_args(1; 1; 1; 1; 1);
+   Func_with_many_args(0; 10; 1; 2; 2);
    if (v == 3) {
-   return 0;
+        return 0;
    };
-   Func_with_many_args(v; 4+8*9; "sdfdf"; Func(65); 7; a || b >= 4);
 }
