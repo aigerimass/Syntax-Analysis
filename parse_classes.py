@@ -111,7 +111,7 @@ class Function:
             elif unit_type is StringLiteral:
                 return str(expr.arg.arg)
             elif unit_type is ExpInBrackets:
-                return self.parse_expr(expr.arg)
+                return self.parse_expr(expr.arg.arg)
             elif unit_type is OpFuncCall:
                 if not (expr.arg.name in self.functions):
                     print("ERROR: the function", expr.arg.name, "has no declaration")

@@ -2,10 +2,10 @@ Func_with_many_args(a; b; c; d; e){
 return a + b + c + d + e;
 }
 
-Func_with_While(condition){
+Func_with_While(bound){
     a = 10;
-    while(condition > a){
-        a = a + 5;
+    while(bound > a){
+        a = (a + 5);
     };
     return a + 4*8^2;
 }
@@ -19,12 +19,12 @@ Main () {
    Fain();
    v = Func_with_many_args(1; 1; 1; 1; 1);
    v = v + Func_with_While(20);
-   g = 1 > 0;
+   g = (((1 > 0)));
    if (g) {
        v = v ^ 2;
    };
    if (v == 4) {
-        v = v * (-10);
+        v = 0 * (-10);
    } else {
         v = v * 10;
    };
