@@ -36,7 +36,7 @@ class Function:
             print("#" + str(n) + " = " + str(v))
         for op in self.body:
             print(op, end=';\n')
-            if type(op) is OpBinding:
+            if type(op) is OpBinding and type(self.values[op.variable.name]) is int:
                 print("#" + op.variable.name + " = ", self.bounds[op.variable.name], sep="", end=';\n')
 
         return "}"
@@ -208,6 +208,10 @@ class OpIf:
         print(self.condition, end=') {\n')
         print(*self.body, sep=";\n", end=";\n")
         print("}", end="")
+        if self.body_else:
+            print(" else {")
+            print(*self.body_else, sep=";\n", end=";\n")
+            print("}", end="")
         return ""
 
     def show(self):
