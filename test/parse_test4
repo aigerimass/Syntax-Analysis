@@ -1,0 +1,7 @@
+Func_with_many_args(a; b; c; d; e;){
+    return a + b + c + d + e;
+}
+
+Main () {
+   v = Func_with_many_args(1; 1; 1; 1;);
+}
