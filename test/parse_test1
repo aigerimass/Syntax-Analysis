@@ -11,13 +11,12 @@ Func_with_While(bound){
 }
 
 Fain(){
-    skip;
 }
 
 Main () {
    v = 4;
    Fain();
-   v = Func_with_many_args(1; 1; 1; 1; 1);
+   v = Func_with_many_args(1; 1; 1; 1; 1;);
    v = v + Func_with_While(20);
    g = (((1 > 0)));
    if (g) {
