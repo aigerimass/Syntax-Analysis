@@ -241,6 +241,5 @@ result = parser.parse(s)
 result.show()
 
 print("----------INTERVAL-ANALYSIS----------")
-result.parse_main()
-result.anal()
+result.arithmetic_parse()
 print(result)

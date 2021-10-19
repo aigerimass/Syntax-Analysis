@@ -10,14 +10,9 @@ class Program:
             func.show()
             print("--------")
 
-    def parse_main(self):
+    def arithmetic_parse(self):
         self.dic_functions["Main"].func_parse([], self.dic_functions)
 
-    def anal(self):
-        print("gachi ANALYSE:")
-        for n, v in self.dic_functions["Main"].bounds.items():
-            print(str(n) + " = " + str(v))
-            print()
 
     def __repr__(self):
         for func in self.functions:
@@ -40,7 +35,11 @@ class Function:
         print(*self.args, sep='; ', end=') {\n')
         for n, v in self.bounds.items():
             print("#" + str(n) + " = " + str(v))
-        print(*self.body, sep=";\n", end=";\n")
+        for op in self.body:
+            print(op, end=';\n')
+            if type(op) is OpBinding:
+                print("#", self.bounds[op.variable.name], sep="", end=';\n')
+
         return "}"
 
     def show(self):
@@ -109,6 +108,8 @@ class Function:
                 return int(expr.arg.arg)
             elif unit_type is StringLiteral:
                 return str(expr.arg.arg)
+            elif unit_type is ExpInBrackets:
+                return self.parse_expr(expr.arg)
             elif expr_type is OpFuncCall:
                 if not (expr.name in self.functions):
                     print("ERROR: the function", expr.name, "has no declaration")
@@ -668,7 +669,7 @@ class ExpInBrackets:
         self.arg = arg
 
     def __repr__(self):
-        print(self.arg, end="")
+        print("(", self.arg, ")", sep="", end="")
         return ""
 
     def show(self):
@@ -688,33 +689,3 @@ class Variable:
     def show(self):
         print("Var \"", self.name, "\"", end="", sep="")
 
-# t = ExpWithoutOr(ExpPower(ExpPlus(Number(3), StringLiteral("abcd")), Variable("tru")))
-# t.show()
-# print()
-# g = OpFuncCall("namefunc", [Variable("arg1"), Variable("arg2")])
-# g.show()
-# print()
-# r = OpFuncReturn(t)
-# r.show()
-# print()
-# w = OpWhile(t, [g, r])
-# w.show()
-# i = OpIf(t, [w], [g])
-# i.show()
-
-# t = Program([Function("Main", [], [OpBinding(Variable("x"), ExpMultiply(ExpUnit(Number(10)), ExpUnit(Number(2)))),
-#                                    OpBinding(Variable("y"), ExpPlus(ExpUnit(Number(1)), ExpUnit(Number(2)))),
-#                                    OpBinding(Variable("x"), ExpOr(ExpUnit(Number(1)), ExpUnit(Number(2)))),
-#                                    OpBinding(Variable("x"), ExpPlus(ExpUnit(Number(1)), ExpUnit(Number(2)))),
-#                                    OpBinding(Variable("y"), ExpPower(ExpUnit(Number(2)), ExpUnit(Variable('x')))),
-#                                    OpBinding(Variable("x"), ExpDivision(ExpUnit(Number(100)), ExpUnit(Number(2)))),
-#                                    OpBinding(Variable("t"), ExpDivision(ExpUnit(Number(200)), ExpUnit(Number(1)))),
-#                                    OpIf(ExpGreater(ExpUnit(Variable("t")), ExpUnit(Number(1000))), [
-#                                        OpBinding(Variable("t"), ExpUnit(Number(1000)))],
-#                                         [
-#                                             OpBinding(Variable("t"), ExpUnit(Number(1)))
-#                                          ]),
-#                                    ],
-#                       )])
-# t.parse_main()
-# t.anal()
