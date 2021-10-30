@@ -18,15 +18,14 @@ def p_list_of_functions(p):
     else:
         p[0] = []
 
-
 def p_main(p):
     '''main : MAIN ROUND_OPEN_BRACKET ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
-    p[0] = Function(p[1], [], p[5])
+    p[0] = Function(p[1], [], p[5], len(p[5]))
 
 
 def p_func_init(p):
     '''func_init : FUNCTION ROUND_OPEN_BRACKET list_of_args ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
-    p[0] = Function(p[1], p[3], p[6])
+    p[0] = Function(p[1], p[3], p[6], len(p[6]))
 
 
 def p_list_of_args(p):
@@ -67,7 +66,7 @@ def p_op_skip(p):
 
 def p_op_if(p):
     '''op_if : IF ROUND_OPEN_BRACKET expr ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET ELSE CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET
-            | IF ROUND_OPEN_BRACKET expr ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
+             | IF ROUND_OPEN_BRACKET expr ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
     if len(p) == 12:
         p[0] = OpIf(p[3], p[6], p[10])
     else:
@@ -90,7 +89,9 @@ def p_op_return(p):
 
 
 def p_f_call(p):
-    '''f_call : FUNCTION ROUND_OPEN_BRACKET list_of_args_call ROUND_CLOSED_BRACKET'''
+    '''f_call : FUNCTION ROUND_OPEN_BRACKET list_of_args_call ROUND_CLOSED_BRACKET
+              | READ ROUND_OPEN_BRACKET list_of_args_call ROUND_CLOSED_BRACKET
+              | WRITE ROUND_OPEN_BRACKET list_of_args_call ROUND_CLOSED_BRACKET'''
     p[0] = OpFuncCall(p[1], p[3])
 
 
@@ -239,7 +240,7 @@ s = open(sys.argv[1], 'r').read()
 
 result = parser.parse(s)
 result.show()
-
-print("----------INTERVAL-ANALYSIS----------")
+print("----------Run----------------------")
 result.arithmetic_parse()
+print("----------INTERVAL-ANALYSIS--------")
 print(result)

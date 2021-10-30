@@ -1,3 +1,5 @@
+import copy
+
 class Program:
     def __init__(self, arg):
         self.functions = arg
@@ -15,31 +17,41 @@ class Program:
 
     def __repr__(self):
         for func in self.functions:
-            print(func)
+            # print(func)
+            func.print()
             print("------------")
         return ""
 
 
 class Function:
-    def __init__(self, name, args, body):
+    def __init__(self, name, args, body, line_count):
         self.name = name
         self.args = args
         self.body = body
         self.functions = dict()
         self.values = dict()
-        self.bounds = dict()
+        self.bounds = []
+        self.bounds.append(dict())
+        self.line_number = [0]
 
-    def __repr__(self):
+    def print(self, god_bounds=None, god_line=None):
+        self.line_number[0] = 0
         print(self.name, '(', end='')
         print(*self.args, sep='; ', end=') {\n')
-        for n, v in self.bounds.items():
+        for n, v in self.bounds[0].items():
             print("#" + str(n) + " = " + str(v))
+        self.line_number[0] += 1
         for op in self.body:
-            print(op, end=';\n')
-            if type(op) is OpBinding and type(self.values[op.variable.name]) is int:
-                print("#" + op.variable.name + " = ", self.bounds[op.variable.name], sep="", end=';\n')
+            op.print(self.bounds, self.line_number)
+            print(';')
+            for var in self.bounds[self.line_number[0]]:
+                print("#" + var + " = ",
+                      self.bounds[self.line_number[0]][var],
+                      sep="", end=';\n')
 
-        return "}"
+            self.line_number[0] += 1
+        print("};")
+        return ""
 
     def show(self):
         print("Function Definition: [\nname = \"", self.name, "\",\nargs:", sep="", end=" ")
@@ -53,52 +65,52 @@ class Function:
             print(";\n")
         print("]")
 
-    def parse_expr(self, expr):
+    def parse_expr(self, expr, line_number):
         expr_type = type(expr)
         if expr_type is Exp:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpWithoutOr:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpWithoutAnd:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpWithoutNot:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpWithoutCompare:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpWithoutUnaryMinus:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpMonomial:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpIndivisible:
-            return self.parse_expr(expr.arg)
+            return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpOr:
-            return self.parse_expr(expr.arg1) or self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) or self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpAnd:
-            return self.parse_expr(expr.arg1) and self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) and self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpNot:
-            return not (self.parse_expr(expr.arg))
+            return not (self.parse_expr(expr.arg, line_number))
         elif expr_type is ExpEqual:
-            return self.parse_expr(expr.arg1) == self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) == self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpGreater:
-            return self.parse_expr(expr.arg1) > self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) > self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpGreaterEqual:
-            return self.parse_expr(expr.arg1) >= self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) >= self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpLess:
-            return self.parse_expr(expr.arg1) < self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) < self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpLessEqual:
-            return self.parse_expr(expr.arg1) <= self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) <= self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpPlus:
-            return self.parse_expr(expr.arg1) + self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) + self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpMinus:
-            return self.parse_expr(expr.arg1) - self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) - self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpMultiply:
-            return self.parse_expr(expr.arg1) * self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) * self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpDivision:
-            return self.parse_expr(expr.arg1) // self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) // self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpUnaryMinus:
-            return -self.parse_expr(expr.arg)
+            return -self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpPower:
-            return self.parse_expr(expr.arg1) ** self.parse_expr(expr.arg2)
+            return self.parse_expr(expr.arg1, line_number) ** self.parse_expr(expr.arg2, line_number)
         elif expr_type is ExpUnit:
             unit_type = type(expr.arg)
             if unit_type is Variable:
@@ -111,7 +123,7 @@ class Function:
             elif unit_type is StringLiteral:
                 return str(expr.arg.arg)
             elif unit_type is ExpInBrackets:
-                return self.parse_expr(expr.arg.arg)
+                return self.parse_expr(expr.arg.arg, line_number)
             elif unit_type is OpFuncCall:
                 if not (expr.arg.name in self.functions):
                     print("ERROR: the function", expr.arg.name, "has no declaration")
@@ -125,49 +137,62 @@ class Function:
 
     def body_parse(self, body):
         for op in body:
+            self.bounds.append(copy.deepcopy(self.bounds[-1]))
             if type(op) is OpBinding:
-                self.values[op.variable.name] = self.parse_expr(op.expr)
+                self.values[op.variable.name] = self.parse_expr(op.expr, self.line_number)
                 if type(self.values[op.variable.name]) is int:
-                    if op.variable.name not in self.bounds:
-                        self.bounds[op.variable.name] = [self.values[op.variable.name], self.values[op.variable.name]]
-                    up_bound = max(self.bounds[op.variable.name][1],
-                                   self.values[op.variable.name])
-                    down_bound = min(self.bounds[op.variable.name][0],
-                                     self.values[op.variable.name])
-                    self.bounds[op.variable.name] = [down_bound, up_bound]
+                    prev_values = [self.values[op.variable.name], self.values[op.variable.name]]
+                    if op.variable.name in self.bounds[-1]:
+                        prev_values = self.bounds[-1][op.variable.name]
+                    up_bound = max(
+                        prev_values[1],
+                        self.values[op.variable.name])
+                    down_bound = min(
+                        prev_values[0],
+                        self.values[op.variable.name])
+                    self.bounds[-1][op.variable.name] = [down_bound, up_bound]
             elif type(op) is OpIf:
-                b_before, v_before = dict(self.bounds), dict(self.values)
-
+                b_before, v_before = self.bounds[-1].copy(), dict(self.values)
                 return_if = self.body_parse(op.body)
-                b_after_if, v_after_if = dict(self.bounds), dict(self.values)
-                self.bounds, self.values = dict(b_before), dict(v_before)
-
+                b_after_if, v_after_if = self.bounds[-1].copy(), dict(self.values)
+                self.values = dict(v_before)
+                self.bounds.append(copy.deepcopy(b_before))
                 return_else = self.body_parse(op.body_else)
-                b_after_else, v_after_else = dict(self.bounds), dict(self.values)
-                self.bounds, self.values = dict(b_before), dict(v_before)
-                for var in b_before:
-                    b_before[var][0] = min(b_after_if[var][0], b_after_else[var][0])
-                    b_before[var][1] = max(b_after_if[var][1], b_after_else[var][1])
-                if self.parse_expr(op.condition):
+                b_after_else, v_after_else = dict(self.bounds[-1]), dict(self.values)
+                self.values = dict(v_before)
+
+                # for var in b_before:
+                #     b_before[var][0] = min(b_after_if[var][0], b_after_else[var][0])
+                #     b_before[var][1] = max(b_after_if[var][1], b_after_else[var][1])
+                if self.parse_expr(op.condition, self.line_number[0]):
+                    self.bounds.append(copy.deepcopy(b_after_if))
                     self.values = v_after_if
                     if return_if is not OpSkip:
                         return return_if
                 else:
+                    self.bounds.append(copy.deepcopy(b_after_else))
                     self.values = v_after_else
                     if return_else is not OpSkip:
                         return return_else
             elif type(op) is OpFuncCall:
-                if not (op.name in self.functions):
+                if op.name == "Write":
+                    print(
+                        self.parse_expr(op.args[0], self.line_number[0])
+                    )
+                elif op.name == "Read":
+                    exit(1)
+                elif not (op.name in self.functions):
                     print("ERROR: the function", op.name, "has no declaration")
                     exit(1)
-                self.functions[op.name].func_parse(op.args, self.functions)
+                else:
+                    self.functions[op.name].func_parse(op.args, self.functions)
             elif type(op) is OpWhile:
-                while self.parse_expr(op.condition):
+                while self.parse_expr(op.condition, self.line_number[0]):
                     x = self.body_parse(op.body)
                     if x is not OpSkip:
                         return x
             elif type(op) is OpFuncReturn:
-                return self.parse_expr(op.expr)
+                return self.parse_expr(op.expr, self.line_number[0])
             elif type(op) is OpSkip:
                 continue
             else:
@@ -175,16 +200,18 @@ class Function:
         return OpSkip
 
     def func_parse(self, args, all_functions):
+        self.line_number[0] = 0
         self.functions = all_functions
+        line_number = 0
         for (expr, var_name) in zip(args, self.args):
-            self.values[var_name] = self.parse_expr(expr)
+            self.values[var_name] = self.parse_expr(expr, line_number)
             if var_name not in self.bounds:
-                self.bounds[var_name] = [self.values[var_name], self.values[var_name]]
-            up_bound = max(self.bounds[var_name][1],
+                self.bounds[line_number][var_name] = [self.values[var_name], self.values[var_name]]
+            up_bound = max(self.bounds[line_number][var_name][1],
                            self.values[var_name])
-            down_bound = min(self.bounds[var_name][0],
+            down_bound = min(self.bounds[line_number][var_name][0],
                              self.values[var_name])
-            self.bounds[var_name] = [down_bound, up_bound]
+            self.bounds[line_number][var_name] = [down_bound, up_bound]
         return self.body_parse(self.body)
 
 
@@ -192,8 +219,8 @@ class OpSkip:
     def __init__(self):
         pass
 
-    def __repr__(self):
-        return "skip"
+    def print(self, god_bounds, god_line):
+        print("skip")
 
     def show(self):
         print("Skip()", end="")
@@ -205,14 +232,30 @@ class OpIf:
         self.body = body
         self.body_else = body_else
 
-    def __repr__(self):
+    def print(self, god_bounds, god_line):
         print("if", ' (', end='')
         print(self.condition, end=') {\n')
-        print(*self.body, sep=";\n", end=";\n")
+        god_line[0] += 1
+        for op in self.body:
+            op.print(god_bounds, god_line)
+            print(";")
+            if type(op) is OpBinding and op.variable.name in god_bounds[god_line[0]]:
+                print("#" + op.variable.name + " = ",
+                      god_bounds[god_line[0]][op.variable.name],
+                      sep="", end=';\n')
+            god_line[0] += 1
         print("}", end="")
+        god_line[0] += 1
         if self.body_else:
             print(" else {")
-            print(*self.body_else, sep=";\n", end=";\n")
+            for op in self.body_else:
+                op.print(god_bounds, god_line)
+                print(";")
+                if type(op) is OpBinding and op.variable.name in god_bounds[god_line[0]]:
+                    print("#" + op.variable.name + " = ",
+                          god_bounds[god_line[0]][op.variable.name],
+                          sep="", end=';\n')
+                god_line[0] += 1
             print("}", end="")
         return ""
 
@@ -237,10 +280,18 @@ class OpWhile:
         self.condition = condition
         self.body = body
 
-    def __repr__(self):
+    def print(self, god_bounds, god_line):
         print("while (", self.condition, ") {", sep="")
-        print(*self.body, sep=";\n", end=";\n")
-        return "}"
+        # print(*self.body, sep=";\n", end=";\n")
+        for op in self.body:
+            op.print(god_bounds, god_line)
+            if type(op) is OpBinding and op.variable.name in god_bounds:
+                print("#" + op.variable.name + " = ",
+                      god_bounds[god_line[0]][op.variable.name],
+                      sep="", end=';\n')
+            god_line[0] += 1
+            print(";")
+        print("}", end="")
 
     def show(self):
         print(">While(\ncond: ")
@@ -257,7 +308,7 @@ class OpBinding:
         self.variable = variable
         self.expr = expr
 
-    def __repr__(self):
+    def print(self, god_bounds=None, god_line=None):
         print(self.variable.name, "=", self.expr, end="")
         return ""
 
@@ -274,7 +325,12 @@ class OpFuncCall:
         self.name = name
         self.args = args
 
-    def __repr__(self):
+    def print(self, god_bounds=None, god_line=None):
+        print(self.name, " (", sep="", end="")
+        print(*self.args, sep=";", end=")")
+        return ""
+
+    def __repr__(self, god_bounds=None, god_line=None):
         print(self.name, " (", sep="", end="")
         print(*self.args, sep=";", end=")")
         return ""
@@ -295,7 +351,7 @@ class OpFuncReturn:
     def __init__(self, expr):
         self.expr = expr
 
-    def __repr__(self):
+    def print(self, god_bounds=None, god_line=None):
         print("return ", self.expr, sep="", end="")
         return ""
 

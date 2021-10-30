@@ -5,6 +5,7 @@ Func_with_many_args(a; b; c; d; e){
 Func_with_While(bound){
     a = 10;
     while(bound > a){
+        t = 1000;
         a = (a + 5);
     };
     return a + 4*8^2;
@@ -16,14 +17,16 @@ Fain(){
 Main () {
    v = 4;
    Fain();
-   v = Func_with_many_args(1; 1; 1; 1; 1;);
+   v = Func_with_many_args(1; 1; 1; 1; 2;);
    v = v + Func_with_While(20);
    g = (((1 > 0)));
+   a = 10;
+   Write(v;);
    if (g) {
        v = v ^ 2;
    };
    if (v == 4) {
-        v = 0 * (-10);
+        v = 1 * (-10);
    } else {
         v = v * 10;
    };
