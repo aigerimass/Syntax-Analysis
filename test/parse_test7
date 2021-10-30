@@ -1,0 +1,14 @@
+Func_with_While(times){
+    a = 0;
+    rat = 2;
+    while(a < times){
+        if (a >= 1) {
+            d = Read();
+        };
+        a = a + 1;
+    };
+}
+
+Main () {
+    Func_with_While(Read());
+}

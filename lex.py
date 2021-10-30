@@ -42,7 +42,7 @@ tokens = [
 t_ignore = ' \n'
 t_PLUS = '\+'
 t_MINUS = '-'
-t_DIV = r'\\'
+t_DIV = r'/'
 t_EQUAL = '=='
 t_BINDING = '='
 t_GEQ = '>='

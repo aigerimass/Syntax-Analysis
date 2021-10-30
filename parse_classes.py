@@ -1,5 +1,8 @@
 import copy
 
+input_bounds = [None, None]
+
+
 class Program:
     def __init__(self, arg):
         self.functions = arg
@@ -17,7 +20,6 @@ class Program:
 
     def __repr__(self):
         for func in self.functions:
-            # print(func)
             func.print()
             print("------------")
         return ""
@@ -33,8 +35,11 @@ class Function:
         self.bounds = []
         self.bounds.append(dict())
         self.line_number = [0]
+        self.can_read = True
 
     def print(self, god_bounds=None, god_line=None):
+        if len(self.bounds) == 1 and len(self.args) != 0:
+            return
         self.line_number[0] = 0
         print(self.name, '(', end='')
         print(*self.args, sep='; ', end=') {\n')
@@ -48,7 +53,6 @@ class Function:
                 print("#" + var + " = ",
                       self.bounds[self.line_number[0]][var],
                       sep="", end=';\n')
-
             self.line_number[0] += 1
         print("};")
         return ""
@@ -68,6 +72,7 @@ class Function:
     def parse_expr(self, expr, line_number):
         expr_type = type(expr)
         if expr_type is Exp:
+
             return self.parse_expr(expr.arg, line_number)
         elif expr_type is ExpWithoutOr:
             return self.parse_expr(expr.arg, line_number)
@@ -125,7 +130,14 @@ class Function:
             elif unit_type is ExpInBrackets:
                 return self.parse_expr(expr.arg.arg, line_number)
             elif unit_type is OpFuncCall:
-                if not (expr.arg.name in self.functions):
+                if expr.arg.name == "Read":
+                    inp = input()
+                    try:
+                        inp = int(inp)
+                        return inp
+                    except ValueError:
+                        return inp
+                elif not (expr.arg.name in self.functions):
                     print("ERROR: the function", expr.arg.name, "has no declaration")
                     exit(1)
                 return self.functions[expr.arg.name].func_parse(expr.arg.args, self.functions)
@@ -152,15 +164,17 @@ class Function:
                         self.values[op.variable.name])
                     self.bounds[-1][op.variable.name] = [down_bound, up_bound]
             elif type(op) is OpIf:
+                self.can_read = self.parse_expr(op.condition, self.line_number[0])
                 b_before, v_before = self.bounds[-1].copy(), dict(self.values)
                 return_if = self.body_parse(op.body)
                 b_after_if, v_after_if = self.bounds[-1].copy(), dict(self.values)
                 self.values = dict(v_before)
                 self.bounds.append(copy.deepcopy(b_before))
+                self.can_read ^= True
                 return_else = self.body_parse(op.body_else)
                 b_after_else, v_after_else = dict(self.bounds[-1]), dict(self.values)
                 self.values = dict(v_before)
-
+                self.can_read = True
                 # for var in b_before:
                 #     b_before[var][0] = min(b_after_if[var][0], b_after_else[var][0])
                 #     b_before[var][1] = max(b_after_if[var][1], b_after_else[var][1])
@@ -180,17 +194,25 @@ class Function:
                         self.parse_expr(op.args[0], self.line_number[0])
                     )
                 elif op.name == "Read":
-                    exit(1)
+                    input()
                 elif not (op.name in self.functions):
                     print("ERROR: the function", op.name, "has no declaration")
                     exit(1)
                 else:
                     self.functions[op.name].func_parse(op.args, self.functions)
             elif type(op) is OpWhile:
+                size_before_while = len(self.bounds)
+                x = self.body_parse(op.body)
+
+                if x is not OpSkip:
+                    return x
                 while self.parse_expr(op.condition, self.line_number[0]):
+                    self.bounds = self.bounds[:size_before_while - 1] + self.bounds[-1:]
+                    size_before_while = len(self.bounds)
                     x = self.body_parse(op.body)
                     if x is not OpSkip:
                         return x
+                # self.bounds.append(copy.deepcopy(self.bounds[-1]))
             elif type(op) is OpFuncReturn:
                 return self.parse_expr(op.expr, self.line_number[0])
             elif type(op) is OpSkip:
@@ -285,12 +307,12 @@ class OpWhile:
         # print(*self.body, sep=";\n", end=";\n")
         for op in self.body:
             op.print(god_bounds, god_line)
-            if type(op) is OpBinding and op.variable.name in god_bounds:
-                print("#" + op.variable.name + " = ",
-                      god_bounds[god_line[0]][op.variable.name],
-                      sep="", end=';\n')
             god_line[0] += 1
             print(";")
+            for var in god_bounds[-1]:
+                print("#" + var + " = ",
+                      god_bounds[-1][var],
+                      sep="", end=';\n')
         print("}", end="")
 
     def show(self):
