@@ -1,7 +1,5 @@
 import copy
 
-input_bounds = [None, None]
-
 
 class Program:
     def __init__(self, arg):
@@ -26,7 +24,7 @@ class Program:
 
 
 class Function:
-    def __init__(self, name, args, body, line_count):
+    def __init__(self, name, args, body, line_start):
         self.name = name
         self.args = args
         self.body = body
@@ -36,6 +34,7 @@ class Function:
         self.bounds.append(dict())
         self.line_number = [0]
         self.can_read = True
+        self.line_start = line_start
 
     def print(self, god_bounds=None, god_line=None):
         if len(self.bounds) == 1 and len(self.args) != 0:
@@ -175,9 +174,6 @@ class Function:
                 b_after_else, v_after_else = dict(self.bounds[-1]), dict(self.values)
                 self.values = dict(v_before)
                 self.can_read = True
-                # for var in b_before:
-                #     b_before[var][0] = min(b_after_if[var][0], b_after_else[var][0])
-                #     b_before[var][1] = max(b_after_if[var][1], b_after_else[var][1])
                 if self.parse_expr(op.condition, self.line_number[0]):
                     self.bounds.append(copy.deepcopy(b_after_if))
                     self.values = v_after_if
@@ -238,7 +234,8 @@ class Function:
 
 
 class OpSkip:
-    def __init__(self):
+    def __init__(self, line_start):
+        self.line_start = line_start
         pass
 
     def print(self, god_bounds, god_line):
@@ -249,10 +246,11 @@ class OpSkip:
 
 
 class OpIf:
-    def __init__(self, condition, body, body_else):
+    def __init__(self, condition, body, body_else, line_start):
         self.condition = condition
         self.body = body
         self.body_else = body_else
+        self.line_start = line_start
 
     def print(self, god_bounds, god_line):
         print("if", ' (', end='')
@@ -298,13 +296,13 @@ class OpIf:
 
 
 class OpWhile:
-    def __init__(self, condition, body):
+    def __init__(self, condition, body, line_start):
         self.condition = condition
         self.body = body
+        self.line_start = line_start
 
     def print(self, god_bounds, god_line):
         print("while (", self.condition, ") {", sep="")
-        # print(*self.body, sep=";\n", end=";\n")
         for op in self.body:
             op.print(god_bounds, god_line)
             god_line[0] += 1
@@ -326,9 +324,10 @@ class OpWhile:
 
 
 class OpBinding:
-    def __init__(self, variable, expr):
+    def __init__(self, variable, expr, line_start):
         self.variable = variable
         self.expr = expr
+        self.line_start = line_start
 
     def print(self, god_bounds=None, god_line=None):
         print(self.variable.name, "=", self.expr, end="")
@@ -370,8 +369,9 @@ class OpFuncCall:
 
 
 class OpFuncReturn:
-    def __init__(self, expr):
+    def __init__(self, expr, line_start):
         self.expr = expr
+        self.line_start = line_start
 
     def print(self, god_bounds=None, god_line=None):
         print("return ", self.expr, sep="", end="")

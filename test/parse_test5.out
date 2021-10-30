@@ -1,0 +1,43 @@
+----------SYNTAX-ANALYSIS----------
+Function Definition: [
+name = "Func_with_many_args",
+args: "a", "b", "c", "d", e
+body:
+>Return(Plus(Plus(Plus(Plus(Var "a", Var "b"), Var "c"), Var "d"), Var "e"));
+
+]
+--------
+Function Definition: [
+name = "F",
+args: 
+body:
+]
+--------
+Function Definition: [
+name = "Main",
+args: 
+body:
+>Bind(Var "v", >Call(name: "Func_with_many_args", args: Plus(1, 12), 1, 1, 1, 1, 1));
+
+]
+--------
+----------INTERVAL-ANALYSIS----------
+Func_with_many_args (a; b; c; d; e) {
+#a = [13, 13]
+#b = [1, 1]
+#c = [1, 1]
+#d = [1, 1]
+#e = [1, 1]
+return a + b + c + d + e;
+}
+------------
+F () {
+}
+------------
+Main () {
+#v = [17, 17]
+v = Func_with_many_args (1 + 12;1;1;1;1;1);
+#v = [17, 17];
+}
+------------
+

@@ -4,6 +4,7 @@ import ply.yacc as yacc
 from lex import tokens
 from parse_classes import *
 
+cc = 0
 
 def p_program(p):
     '''program : list_of_functions main'''
@@ -13,19 +14,22 @@ def p_program(p):
 def p_list_of_functions(p):
     '''list_of_functions : func_init list_of_functions
                         |'''
+    global cc
     if len(p) == 3:
         p[0] = [p[1]] + p[2]
     else:
         p[0] = []
+    cc += 1
 
 def p_main(p):
     '''main : MAIN ROUND_OPEN_BRACKET ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
-    p[0] = Function(p[1], [], p[5], len(p[5]))
+    p[0] = Function(p[1], [], p[5], cc)
+
 
 
 def p_func_init(p):
     '''func_init : FUNCTION ROUND_OPEN_BRACKET list_of_args ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
-    p[0] = Function(p[1], p[3], p[6], len(p[6]))
+    p[0] = Function(p[1], p[3], p[6], cc)
 
 
 def p_list_of_args(p):
@@ -61,31 +65,31 @@ def p_operation(p):
 
 def p_op_skip(p):
     '''op_skip : SKIP'''
-    p[0] = OpSkip()
+    p[0] = OpSkip(cc)
 
 
 def p_op_if(p):
     '''op_if : IF ROUND_OPEN_BRACKET expr ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET ELSE CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET
              | IF ROUND_OPEN_BRACKET expr ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
     if len(p) == 12:
-        p[0] = OpIf(p[3], p[6], p[10])
+        p[0] = OpIf(p[3], p[6], p[10], cc)
     else:
-        p[0] = OpIf(p[3], p[6], [])
+        p[0] = OpIf(p[3], p[6], [], cc)
 
 
 def p_op_while(p):
     '''op_while : WHILE ROUND_OPEN_BRACKET expr ROUND_CLOSED_BRACKET CURLY_OPEN_BRACKET list_of_op CURLY_CLOSED_BRACKET'''
-    p[0] = OpWhile(p[3], p[6])
+    p[0] = OpWhile(p[3], p[6], cc)
 
 
 def p_op_bind(p):
     '''op_bind : VARIABLE BINDING expr'''
-    p[0] = OpBinding(Variable(p[1]), p[3])
+    p[0] = OpBinding(Variable(p[1]), p[3], cc)
 
 
 def p_op_return(p):
     '''op_return : RETURN expr'''
-    p[0] = OpFuncReturn(p[2])
+    p[0] = OpFuncReturn(p[2], cc)
 
 
 def p_f_call(p):

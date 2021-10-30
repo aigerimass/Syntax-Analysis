@@ -1,0 +1,36 @@
+----------SYNTAX-ANALYSIS----------
+Function Definition: [
+name = "F",
+args: 
+body:
+>Return(4);
+
+]
+--------
+Function Definition: [
+name = "Func_with_While",
+args: condition
+body:
+>While(
+cond: 
+Gt(Var "condition", 0)
+body:
+>Bind(Var "a", Plus(Var "a", 5));
+);
+
+>Return(Plus(Var "a", Mult(4, Pow(8, 2))));
+
+]
+--------
+Function Definition: [
+name = "Main",
+args: 
+body:
+>Call(name: "Func_with_While", args: 1);
+
+Skip();
+
+]
+--------
+----------INTERVAL-ANALYSIS----------
+ERROR: VARIABLE "a" doesn't exist

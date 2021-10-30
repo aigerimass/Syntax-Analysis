@@ -1,0 +1,75 @@
+----------SYNTAX-ANALYSIS----------
+Function Definition: [
+name = "Func_with_While",
+args: times
+body:
+>Bind(Var "a", 0);
+
+>Bind(Var "rat", 2);
+
+>While(
+cond: 
+Lt(Var "a", Var "times")
+body:
+>Bind(Var "rat", Plus(Var "rat", >Call(name: "Read", args: )));
+>Call(name: "Write", args: Var "rat");
+>Bind(Var "a", Plus(Var "a", 1));
+);
+
+]
+--------
+Function Definition: [
+name = "Main",
+args: 
+body:
+>Call(name: "Func_with_While", args: >Call(name: "Read", args: ));
+
+]
+--------
+----------Run----------------------
+14
+26
+38
+50
+62
+74
+86
+98
+110
+122
+134
+146
+----------INTERVAL-ANALYSIS--------
+Func_with_While (times) {
+#times = [12, 12]
+a = 0;
+#times = [12, 12];
+#a = [0, 0];
+rat = 2;
+#times = [12, 12];
+#a = [0, 0];
+#rat = [2, 2];
+while (a < times) {
+rat = rat + Read ();
+#times = [12, 12];
+#a = [0, 12];
+#rat = [2, 146];
+Write (rat);
+#times = [12, 12];
+#a = [0, 12];
+#rat = [2, 146];
+a = a + 1;
+#times = [12, 12];
+#a = [0, 12];
+#rat = [2, 146];
+};
+#times = [12, 12];
+#a = [0, 12];
+#rat = [2, 146];
+};
+------------
+Main () {
+Func_with_While (Read ());
+};
+------------
+

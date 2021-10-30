@@ -1,0 +1,11 @@
+----------SYNTAX-ANALYSIS----------
+Function Definition: [
+name = "Main",
+args: 
+body:
+>Bind(Var "b", >Call(name: "F", args: ));
+
+]
+--------
+----------INTERVAL-ANALYSIS----------
+ERROR: the function F has no declaration

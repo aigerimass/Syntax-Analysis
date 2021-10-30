@@ -1,0 +1,19 @@
+----------SYNTAX-ANALYSIS----------
+Function Definition: [
+name = "Func_with_many_args",
+args: "a", "b", "c", "d", e
+body:
+>Return(Plus(Plus(Plus(Plus(Var "a", Var "b"), Var "c"), Var "d"), Var "e"));
+
+]
+--------
+Function Definition: [
+name = "Main",
+args: 
+body:
+>Bind(Var "v", >Call(name: "Func_with_many_args", args: 1, 1, 1, 1));
+
+]
+--------
+----------INTERVAL-ANALYSIS----------
+ERROR: VARIABLE "e" doesn't exist

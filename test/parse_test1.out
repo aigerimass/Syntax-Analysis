@@ -1,0 +1,148 @@
+----------SYNTAX-ANALYSIS----------
+Function Definition: [
+name = "Func_with_many_args",
+args: "a", "b", "c", "d", e
+body:
+>Return(Plus(Plus(Plus(Plus(Var "a", Var "b"), Var "c"), Var "d"), Var "e"));
+
+]
+--------
+Function Definition: [
+name = "Func_with_While",
+args: bound
+body:
+>Bind(Var "a", 10);
+
+>While(
+cond: 
+Gt(Var "bound", Var "a")
+body:
+>Bind(Var "t", 1000);
+>Bind(Var "a", (Plus(Var "a", 5)));
+);
+
+>Return(Plus(Var "a", Mult(4, Pow(8, 2))));
+
+]
+--------
+Function Definition: [
+name = "Fain",
+args: 
+body:
+]
+--------
+Function Definition: [
+name = "Main",
+args: 
+body:
+>Call(name: "Fain", args: );
+
+>Bind(Var "v", 10);
+
+>Bind(Var "v", Plus(Var "v", >Call(name: "Func_with_While", args: 20)));
+
+>Bind(Var "g", (((Gt(1, 0)))));
+
+>Bind(Var "a", Div(10, 2));
+
+>If(
+cond:
+Var "g"
+body:
+>Bind(Var "v", Pow(Var "v", 2));
+);
+
+>If(
+cond:
+Eq(Var "v", 4)
+body:
+>Bind(Var "v", Mult(Mult(1, UnaryMinus(10)), >Call(name: "Read", args: )));
+else body:
+>Bind(Var "v", Mult(Mult(1, UnaryMinus(10)), >Call(name: "Read", args: )));
+);
+
+>While(
+cond: 
+Gt(Var "v", 0)
+body:
+>Bind(Var "v", Div(Var "v", 10));
+>Call(name: "Write", args: Var "v");
+);
+
+]
+--------
+----------Run----------------------
+81796
+8179
+817
+81
+8
+0
+----------INTERVAL-ANALYSIS--------
+------------
+Func_with_While (bound) {
+#bound = [20, 20]
+a = 10;
+#bound = [20, 20];
+#a = [10, 10];
+while (bound > a) {
+t = 1000;
+#bound = [20, 20];
+#a = [10, 20];
+#t = [1000, 1000];
+a = (a + 5);
+#bound = [20, 20];
+#a = [10, 20];
+#t = [1000, 1000];
+};
+#bound = [20, 20];
+#a = [10, 20];
+#t = [1000, 1000];
+return a + 4 * 8 ^^ 2;
+#bound = [20, 20];
+#a = [10, 20];
+#t = [1000, 1000];
+};
+------------
+Fain () {
+};
+------------
+Main () {
+Fain ();
+v = 10;
+#v = [10, 10];
+v = v + Func_with_While (20);
+#v = [10, 286];
+g = (((1 > 0)));
+#v = [10, 286];
+a = 10 // 2;
+#v = [10, 286];
+#a = [5, 5];
+if  (g) {
+v = v ^^ 2;
+#v = [10, 81796];
+};
+#v = [10, 81796];
+#a = [5, 5];
+if  (v == 4) {
+v = 1 * (-10) * Read ();
+#v = [-10, 81796];
+} else {
+v = v * 10;
+#v = [10, 817960];
+};
+#v = [10, 817960];
+#a = [5, 5];
+while (v > 0) {
+v = v // 10;
+#v = [0, 817960];
+#a = [5, 5];
+Write (v);
+#v = [0, 817960];
+#a = [5, 5];
+};
+#v = [0, 817960];
+#a = [5, 5];
+};
+------------
+
