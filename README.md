@@ -1,3 +1,13 @@
+### Syntax and Interval analysis of code. 
+
+We created abstract programming language with functions, different operations (you can see it in the table below), string and numbers literals. 
+
+Lex was used for creating a lexer of the language and Yacc was used for creating a parser on Python language. Parser constructs an Abstract Syntax Tree and then the Interval analysis runs. After the Interval analysis you can see intervals of values for each variable.
+
+
+
+
+
 ### Отчет по проекту
 
 #### Задача
